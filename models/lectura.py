@@ -1,89 +1,53 @@
-from database import conectar_bd
 from datetime import datetime
-
-def guardar_lectura(sensor_id, tipo, valor):
-    conn = conectar_bd()
-    if conn:
-        cursor = conn.cursor()
-        try:
-            # Verificar si el sensor_id existe en la tabla sensores
-            cursor.execute("SELECT id FROM sensores WHERE id = %s", (sensor_id,))
-            if not cursor.fetchone():
-                print(f"Error: El sensor_id={sensor_id} no existe en la tabla sensores.")
-                return
-
-            # Preparar el valor de la fecha
-            fecha_hora = datetime.now()
-
-            # Crear el diccionario con los tipos de sensor
-            tipo_columnas = {
-                "temperatura": "temperatura",
-                "humedad": "humedad",
-                "calidad_aire": "calidad_aire",
-                "presion": "presion"
-            }
-
-            # Verificar si el tipo es válido
-            if tipo not in tipo_columnas:
-                print(f"Error: El tipo {tipo} no es válido.")
-                return
-
-            # Realizar la inserción de datos
-            columna = tipo_columnas[tipo]
-            cursor.execute(
-                f"INSERT INTO lecturas_sensores (sensor_id, {columna}, fecha_hora) VALUES (%s, %s, %s)",
-                (sensor_id, valor, fecha_hora)
-            )
-
-            # Confirmar la transacción
-            conn.commit()
-
-            print(f"Lectura de {tipo} guardada exitosamente en la base de datos.")
-
-        except Exception as e:
-            print(f"Error al insertar en la base de datos: {e}")
-        finally:
-            cursor.close()
-            conn.close()
+from sqlalchemy import Column, Integer, Numeric, DateTime
+from sqlalchemy.orm import Session
+from database import Base, get_db
+from models.sensor import Sensor
 
 
+class LecturaSensor(Base):
+    __tablename__ = 'lecturas_sensores'
 
-def obtener_lectura(sensor_id, tipo):
-    conn = conectar_bd()
-    if conn:
-        cursor = conn.cursor()
-        try:
-            # Crear el diccionario con los tipos de sensor
-            tipo_columnas = {
-                "temperatura": "temperatura",
-                "humedad": "humedad",
-                "calidad_aire": "calidad_aire",
-                "presion": "presion"
-            }
+    id = Column(Integer, primary_key=True, index=True)
+    sensor_id = Column(Integer, nullable=False)
+    temperatura = Column(Numeric(5, 2), nullable=True)
+    humedad = Column(Numeric(5, 2), nullable=True)
+    calidad_aire = Column(Numeric(5, 2), nullable=True)
+    presion = Column(Numeric(7, 2), nullable=True)
+    fecha_hora = Column(DateTime, nullable=True)
 
-            # Verificar si el tipo es válido
-            if tipo not in tipo_columnas:
-                print(f"Error: El tipo {tipo} no es válido.")
-                return
+def guardar_lectura(sensor_id: int, temperatura: float = None, humedad: float = None, calidad_aire: float = None, presion: float = None, db: Session = None):
+    """
+    Guarda una lectura en la base de datos.
+    """
+    if db is None:
+        raise ValueError("La sesión de la base de datos (db) no puede ser nula.")
 
-            # Realizar la consulta para obtener la última lectura
-            columna = tipo_columnas[tipo]
-            cursor.execute(
-                f"SELECT {columna}, fecha_hora FROM lecturas_sensores WHERE sensor_id = %s ORDER BY fecha_hora DESC LIMIT 1",
-                (sensor_id,)
-            )
-            lectura = cursor.fetchone()
+    try:
+        # Verificar si el sensor_id existe en la tabla sensores
+        sensor = db.query(Sensor).filter(Sensor.id == sensor_id).first()
+        if not sensor:
+            print(f"Error: El sensor_id={sensor_id} no existe en la tabla sensores.")
+            return
 
-            if lectura:
-                valor, fecha_hora = lectura
-                print(f"Última lectura de {tipo} del sensor {sensor_id}: {valor} a las {fecha_hora}")
-                return valor, fecha_hora
-            else:
-                print(f"No se encontraron lecturas para el sensor {sensor_id} de tipo {tipo}.")
-                return None
+        # Crear una nueva lectura
+        nueva_lectura = LecturaSensor(
+            sensor_id=sensor_id,
+            temperatura=temperatura,
+            humedad=humedad,
+            calidad_aire=calidad_aire,
+            presion=presion,
+            fecha_hora=datetime.now()
+        )
 
-        except Exception as e:
-            print(f"Error al obtener la lectura de la base de datos: {e}")
-        finally:
-            cursor.close()
-            conn.close()
+        # Añadir y guardar la lectura
+        db.add(nueva_lectura)
+        db.commit()
+        db.refresh(nueva_lectura)
+
+        print(f"✅ Lectura guardada: Sensor {sensor_id} | Temp: {temperatura}°C | Hum: {humedad}% | Calidad: {calidad_aire} | Presión: {presion} hPa")
+
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Error al insertar en la base de datos: {e}")
+        raise  # Relanza la excepción para que pueda ser manejada en el llamador

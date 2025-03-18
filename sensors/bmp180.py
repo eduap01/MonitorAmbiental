@@ -1,6 +1,6 @@
 import random
 
-class BMP80:
+class BMP180:
     def leer_temperatura(self):
         return round(random.uniform(15, 25), 2)  # Simulación de temperatura
 
