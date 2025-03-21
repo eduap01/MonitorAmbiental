@@ -18,3 +18,12 @@ def get_db():
 def create_medicion_endpoint(medicion: MedicionCreate, db: Session = Depends(get_db)):
     db_medicion = create_medicion(db, medicion)
     return db_medicion
+
+
+#@app.post("/mediciones/")
+#async def recibir_medicion(medicion: Medicion):
+    # Aquí se procesan los datos que la Raspberry Pi envió
+ #   print(f"Datos recibidos - Temperatura: {medicion.temperatura}°C, Humedad: {medicion.humedad}%")
+
+    # Puedes guardar estos datos en la base de datos o realizar otras acciones
+ #   return {"status": "Datos recibidos correctamente"}
