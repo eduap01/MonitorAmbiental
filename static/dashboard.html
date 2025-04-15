@@ -25,11 +25,49 @@
         <button onclick="cargarDatos('presion')">Presión</button>
         <button onclick="cargarDatos('calidad_aire')">Aire</button>
         <hr />
-        <button onclick="mostrarPanel('comparar')">Comparar</button>
-        <button onclick="mostrarPanel('filtrar')">Filtrar</button>
-        <button onclick="mostrarPanel('historial')">Historial</button>
+
+        <!-- Submenú Comparar -->
+        <button onclick="toggleSubmenu('submenu-comparar')">Comparar ▾</button>
+        <div id="submenu-comparar" class="submenu oculto">
+          <select id="variable1">
+            <option value="temperatura">Temperatura</option>
+            <option value="humedad">Humedad</option>
+            <option value="presion">Presión</option>
+            <option value="calidad_aire">Calidad del aire</option>
+          </select>
+          <span>vs.</span>
+          <select id="variable2">
+            <option value="humedad">Humedad</option>
+            <option value="temperatura">Temperatura</option>
+            <option value="presion">Presión</option>
+            <option value="calidad_aire">Calidad del aire</option>
+          </select>
+          <button onclick="compararVariables()">Comparar</button>
+        </div>
+
+        <!-- Submenú Filtrar -->
+        <button onclick="toggleSubmenu('submenu-filtrar')">Filtrar ▾</button>
+        <div id="submenu-filtrar" class="submenu oculto">
+          <select id="filtro-condicion">
+            <option value="">— Filtro condicional —</option>
+            <option value="temp_gt_30">Temperatura > 30°C</option>
+            <option value="hum_lt_50">Humedad < 50%</option>
+            <option value="aire_malo">Calidad de aire mala</option>
+          </select>
+          <button onclick="aplicarFiltroCondicional()">Filtrar</button>
+          <button onclick="limpiarFiltro()">Limpiar</button>
+        </div>
+
+        <!-- Submenú Historial -->
+        <button onclick="toggleSubmenu('submenu-historial')">Historial ▾</button>
+        <div id="submenu-historial" class="submenu oculto">
+          <label for="fecha-historial-sidebar">Fecha:</label>
+          <input type="date" id="fecha-historial-sidebar" />
+          <button onclick="filtrarPorFechaDesdeSidebar()">Ver</button>
+        </div>
+
         <hr />
-        <button onclick="alternarModo()">Modo oscuro</button>
+        <button id="btn-modo">Modo oscuro</button>
       </nav>
     </aside>
 
@@ -56,43 +94,6 @@
           <canvas id="grafica"></canvas>
         </div>
 
-        <div class="panel" id="panel-comparar">
-          <h2>Comparar variables</h2>
-          <select id="variable1">
-            <option value="temperatura">Temperatura</option>
-            <option value="humedad">Humedad</option>
-            <option value="presion">Presión</option>
-            <option value="calidad_aire">Calidad del aire</option>
-          </select>
-          <span>vs.</span>
-          <select id="variable2">
-            <option value="humedad">Humedad</option>
-            <option value="temperatura">Temperatura</option>
-            <option value="presion">Presión</option>
-            <option value="calidad_aire">Calidad del aire</option>
-          </select>
-          <button onclick="compararVariables()">Comparar</button>
-        </div>
-
-        <div class="panel" id="panel-filtrar">
-          <h2>Filtro condicional</h2>
-          <select id="filtro-condicion">
-            <option value="">— Filtro condicional —</option>
-            <option value="temp_gt_30">Temperatura > 30°C</option>
-            <option value="hum_lt_50">Humedad < 50%</option>
-            <option value="aire_malo">Calidad de aire mala</option>
-          </select>
-          <button onclick="aplicarFiltroCondicional()">Filtrar</button>
-          <button onclick="limpiarFiltro()">Limpiar</button>
-        </div>
-
-        <div class="panel" id="panel-historial">
-          <h2>Historial diario</h2>
-          <label for="fecha-historial">Fecha:</label>
-          <input type="date" id="fecha-historial" />
-          <button onclick="filtrarPorFecha()">Ver</button>
-        </div>
-
         <div class="panel">
           <h2>Ubicación del sensor</h2>
           <div id="mapa"></div>
@@ -101,7 +102,6 @@
       </div>
     </main>
   </div>
-
   <script src="/static/dashboard.js" defer></script>
 </body>
 </html>

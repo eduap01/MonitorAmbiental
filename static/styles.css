@@ -193,4 +193,35 @@ body.dark .actualizacion {
   display: none;
 }
 
+.submenu {
+  background-color: #f0f0f0;         /* gris claro para modo claro */
+  border-left: 4px solid #999;       /* gris oscuro como acento */
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.submenu.oculto {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.submenu:not(.oculto) {
+  max-height: 500px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.dark .submenu {
+  background-color: #2b2b2b;
+  border-left: 4px solid #ff9800;   /* igual que el texto de última actualización */
+}
+
+
+
+
 

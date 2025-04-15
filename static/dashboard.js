@@ -1,17 +1,13 @@
-
 const ctx = document.getElementById('grafica').getContext('2d');
 let chart = new Chart(ctx, {
   type: 'line',
-  data: {
-    labels: [],
-    datasets: []
-  },
+  data: { labels: [], datasets: [] },
   options: {
     responsive: true,
     maintainAspectRatio: true,
     animation: {
-      duration: 300, // Muy corta duración
-      easing: 'easeInOutQuad' // Suave, sin rebote ni sobresalto
+      duration: 300,
+      easing: 'easeInOutQuad'
     },
     scales: {
       x: {
@@ -27,13 +23,10 @@ let chart = new Chart(ctx, {
           }
         }
       },
-      y: {
-        beginAtZero: true
-      }
+      y: { beginAtZero: true }
     }
   }
 });
-
 
 const colores = {
   temperatura: 'rgba(255, 99, 132, 0.8)',
@@ -48,7 +41,6 @@ let filtroCondicionalActivo = "";
 let modoComparacionActivo = false;
 let ultimoTimestamp = null;
 
-
 async function cargarDatos(tipo) {
   tipoSeleccionado = tipo;
 
@@ -57,7 +49,6 @@ async function cargarDatos(tipo) {
     const datos = await response.json();
     datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
 
-    // Primera carga: dibujar todos
     if (!ultimoTimestamp) {
       datosTotales = datos;
       ultimoTimestamp = new Date(datos[datos.length - 1].fecha_hora).getTime();
@@ -65,21 +56,12 @@ async function cargarDatos(tipo) {
       return;
     }
 
-    // Carga incremental: buscar nuevos
     const nuevos = datos.filter(d => new Date(d.fecha_hora).getTime() > ultimoTimestamp);
-
-    if (nuevos.length > 0) {
-      nuevos.forEach(dato => {
-        añadirNuevoPunto(dato, tipoSeleccionado);
-      });
-    }
-
+    nuevos.forEach(dato => añadirNuevoPunto(dato, tipoSeleccionado));
   } catch (error) {
     console.error("Error al cargar los datos:", error);
   }
 }
-
-
 
 function mostrarTodosEnGrafica(datos, tipo) {
   const labels = datos.map(d => new Date(d.fecha_hora));
@@ -95,7 +77,6 @@ function mostrarTodosEnGrafica(datos, tipo) {
     tension: 0.2
   }];
   chart.update();
-
   actualizarUltimosValores();
 }
 
@@ -118,10 +99,7 @@ function añadirNuevoPunto(dato, tipo) {
   actualizarUltimosValores();
 }
 
-
-
 function actualizarUltimosValores() {
-  if (datosTotales.length === 0) return;
   const ultimo = datosTotales[datosTotales.length - 1];
   if (!ultimo) return;
 
@@ -135,7 +113,6 @@ function actualizarUltimosValores() {
   else if (ultimo.calidad_aire === 0) calidadTexto = "Mala";
 
   document.getElementById("valor-aire").textContent = calidadTexto;
-
   document.getElementById("ultima-actualizacion").textContent =
     "Última actualización: " + new Date().toLocaleString('es-ES');
 }
@@ -145,43 +122,27 @@ function aplicarFiltroCondicional() {
   filtroCondicionalActivo = condicion;
 
   let filtrados = [...datosTotales];
+  if (condicion === "temp_gt_30") filtrados = filtrados.filter(d => d.temperatura > 30);
+  else if (condicion === "hum_lt_50") filtrados = filtrados.filter(d => d.humedad < 50);
+  else if (condicion === "aire_malo") filtrados = filtrados.filter(d => d.calidad_aire === 0);
 
-  if (condicion === "temp_gt_30") {
-    filtrados = filtrados.filter(d => d.temperatura > 30);
-  } else if (condicion === "hum_lt_50") {
-    filtrados = filtrados.filter(d => d.humedad < 50);
-  } else if (condicion === "aire_malo") {
-    filtrados = filtrados.filter(d => d.calidad_aire === 0);
-  }
-
-  if (filtrados.length === 0) {
-    alert("No hay datos que cumplan esa condición.");
-    return;
-  }
-
-  mostrarEnGrafica(filtrados, tipoSeleccionado);
+  if (filtrados.length === 0) return alert("No hay datos que cumplan esa condición.");
+  mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
 }
 
 function limpiarFiltro() {
   filtroCondicionalActivo = "";
   document.getElementById("filtro-condicion").value = "";
-  mostrarEnGrafica(datosTotales, tipoSeleccionado);
-
+  mostrarTodosEnGrafica(datosTotales, tipoSeleccionado);
   modoComparacionActivo = false;
-
 }
 
 function compararVariables() {
-
   modoComparacionActivo = true;
-
   const v1 = document.getElementById("variable1").value;
   const v2 = document.getElementById("variable2").value;
 
-  if (v1 === v2) {
-    alert("Selecciona dos variables diferentes para comparar.");
-    return;
-  }
+  if (v1 === v2) return alert("Selecciona dos variables diferentes para comparar.");
 
   const labels = datosTotales.map(d => new Date(d.fecha_hora));
   const datos1 = datosTotales.map(d => d[v1]);
@@ -210,19 +171,16 @@ function compararVariables() {
 }
 
 let mapa = null;
-
 async function inicializarMapa() {
   try {
     const res = await fetch("/api/ubicacion/");
     const data = await res.json();
-
     const lat = data.lat || 40.4168;
     const lon = data.lon || -3.7038;
     const ciudad = data.ciudad || "Ubicación desconocida";
     const pais = data.pais || "";
 
     mapa = L.map('mapa').setView([lat, lon], 15);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(mapa);
@@ -251,35 +209,26 @@ function analizarTendencias() {
     return;
   }
 
-  const ultimos = datosTotales.slice(-24); // últimas 24 lecturas (ultimo minuto)
+  const ultimos = datosTotales.slice(-24);
   const t0 = ultimos[0];
   const tN = ultimos[ultimos.length - 1];
 
-  const tempSube = tN.temperatura > t0.temperatura;
-  const presionBaja = tN.presion < t0.presion;
-  const humedadAlta = tN.humedad > 60;
-
   let mensaje = "Sin cambios relevantes.";
-
-  if (tempSube && presionBaja) {
-    mensaje = "Posibilidad de lluvia próxima (temperatura sube, presión baja).";
-  } else if (humedadAlta && presionBaja) {
-    mensaje = "Humedad alta y presión baja. Podría haber niebla o lluvias débiles.";
-  } else if (tempSube) {
-    mensaje = "Temperatura en ascenso – posible calor en próximas horas.";
-  } else if (tN.temperatura < t0.temperatura) {
-    mensaje = "Temperatura descendiendo – posibles condiciones frescas.";
-  }
+  if (tN.temperatura > t0.temperatura && tN.presion < t0.presion)
+    mensaje = "Posibilidad de lluvia próxima.";
+  else if (tN.humedad > 60 && tN.presion < t0.presion)
+    mensaje = "Humedad alta y presión baja. Posible niebla o lluvia.";
+  else if (tN.temperatura > t0.temperatura)
+    mensaje = "Temperatura en ascenso – posible calor.";
+  else if (tN.temperatura < t0.temperatura)
+    mensaje = "Temperatura descendiendo – condiciones frescas.";
 
   document.getElementById("mensaje-prediccion").textContent = mensaje;
 }
 
-function filtrarPorFecha() {
-  const fechaStr = document.getElementById("fecha-historial").value;
-  if (!fechaStr) {
-    alert("Selecciona una fecha para ver el historial.");
-    return;
-  }
+function filtrarPorFechaDesdeSidebar() {
+  const fechaStr = document.getElementById("fecha-historial-sidebar").value;
+  if (!fechaStr) return alert("Selecciona una fecha para ver el historial.");
 
   const inicio = new Date(fechaStr);
   const fin = new Date(fechaStr);
@@ -290,47 +239,27 @@ function filtrarPorFecha() {
     return fecha >= inicio && fecha <= fin;
   });
 
-  if (filtrados.length === 0) {
-    alert("No hay datos para esa fecha.");
-    return;
-  }
+  if (filtrados.length === 0) return alert("No hay datos para esa fecha.");
 
   modoComparacionActivo = false;
   filtroCondicionalActivo = "";
-
-  mostrarEnGrafica(filtrados, tipoSeleccionado);
+  mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
 }
 
 function alternarModo() {
   const body = document.body;
-  const btn = document.querySelector('.sidebar-app .menu button:last-child');
-
+  const btn = document.getElementById("btn-modo");
   body.classList.toggle('dark');
-
-  if (body.classList.contains('dark')) {
-    btn.textContent = "Modo día";
-  } else {
-    btn.textContent = "Modo noche";
-}
+  btn.textContent = body.classList.contains('dark') ? "Modo día" : "Modo noche";
 }
 
-
-function toggleMenu() {
-  const menu = document.getElementById('sidebar');
-  menu.classList.toggle('oculto');
-}
-
-function mostrarPanel(nombre) {
-  const ids = ['panel-comparar', 'panel-filtrar', 'panel-historial'];
-
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.display = (id === `panel-${nombre}`) ? 'block' : 'none';
-    }
+function toggleSubmenu(id) {
+  document.querySelectorAll('.submenu').forEach(el => {
+    if (el.id !== id) el.classList.add('oculto');
   });
+  const target = document.getElementById(id);
+  if (target) target.classList.toggle('oculto');
 }
-
 
 window.addEventListener("load", async () => {
   cargarDatos("temperatura");
