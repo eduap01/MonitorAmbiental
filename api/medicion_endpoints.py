@@ -24,6 +24,7 @@ def create_medicion_endpoint(medicion: MedicionCreate, db: Session = Depends(get
     db_medicion = create_medicion(db, medicion)
     return db_medicion
 
+
 #Para sacar todos los registros, pero OJO porque puede colapsar el front
 
 # endpoint GET para listar todas las mediciones

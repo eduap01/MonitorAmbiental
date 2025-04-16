@@ -1,0 +1,29 @@
+import requests
+
+def obtener_ubicacion():
+    try:
+        res = requests.get("http://ip-api.com/json/")
+        if res.status_code == 200:
+            data = res.json()
+            return {
+                "lat": data.get("lat"),
+                "lon": data.get("lon"),
+                "ciudad": data.get("city", "Desconocida"),
+                "pais": data.get("country", "")
+            }
+    except Exception as e:
+        print(f"Error obteniendo ubicación: {e}")
+    return None
+
+def enviar_ubicacion():
+    ubicacion = obtener_ubicacion()
+    if ubicacion:
+        try:
+            # response = requests.post("http://192.168.150.221:8000/api/ubicacion/", json=ubicacion)  # clase
+            response = requests.post("http://192.168.1.41:8000/api/ubicacion/", json=ubicacion)  # casa
+            print("Ubicación enviada:", ubicacion)
+        except Exception as e:
+            print("Error al enviar ubicación:", e)
+
+if __name__ == "__main__":
+    enviar_ubicacion()

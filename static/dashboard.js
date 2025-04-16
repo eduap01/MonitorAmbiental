@@ -121,13 +121,14 @@ function actualizarUltimosValores() {
   document.getElementById("ultima-actualizacion").textContent =
     "Última actualización: " + new Date().toLocaleString('es-ES');
 
-  if (ultimo.prediccion !== undefined) {
-    document.getElementById("mensaje-prediccion").textContent =
-      `Predicción futura (+1h) generada con IA: ${ultimo.prediccion.toFixed(2)} °C`;
-  } else {
-    document.getElementById("mensaje-prediccion").textContent =
-      "Predicción no disponible.";
-  }
+    if (ultimo.prediccion_temp !== undefined) {
+      document.getElementById("mensaje-prediccion").textContent =
+        `Predicción futura (+1h) generada con IA: ${ultimo.prediccion_temp.toFixed(2)} °C`;
+    } else {
+      document.getElementById("mensaje-prediccion").textContent =
+        "Predicción no disponible.";
+    }
+
 }
 
 // Aplica un filtro condicional (temperatura > 30, humedad < 50, calidad_aire = 0)
@@ -261,6 +262,8 @@ function alternarModo() {
 
   body.classList.toggle('dark');
   btn.textContent = body.classList.contains('dark') ? "Modo día" : "Modo noche";
+
+  localStorage.setItem("modoOscuro", modoOscuro ? "true" : "false");
 }
 
 // Muestra u oculta un submenú lateral
@@ -315,6 +318,14 @@ function mostrarPanel(nombre) {
 
 // Inicializa el sistema al cargar la página
 window.addEventListener("load", async () => {
+  // Recuperar modo almacenado
+  const modoGuardado = localStorage.getItem("modoOscuro");
+  if (modoGuardado === "true") {
+    document.body.classList.add("dark");
+    const btn = document.getElementById("btn-modo");
+    if (btn) btn.textContent = "Modo día";
+  }
+
   cargarDatos("temperatura");
   lanzarActualizacion();
   await inicializarMapa();
@@ -324,3 +335,4 @@ window.addEventListener("load", async () => {
     btnModo.addEventListener("click", alternarModo);
   }
 });
+
