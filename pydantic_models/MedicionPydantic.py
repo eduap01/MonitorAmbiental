@@ -10,11 +10,13 @@ class MedicionBase(BaseModel):
     presion: float
     prediccion: Optional[float] = None
 
+# Clase usada para crear mediciones desde el frontend o Raspberry Pi
 class MedicionCreate(MedicionBase):
-    pass
+    pass  # Hereda todos los campos de MedicionBase sin cambios
 
+# Clase para retornar mediciones desde la API con ID generado automáticamente
 class Medicion(MedicionBase):
-    id: int
+    id: int                               # ID único de la medición (generado automáticamente)
 
     class Config:
-        from_attributes  = True
+        from_attributes = True            # Permite conversión automática desde objetos SQLAlchemy
