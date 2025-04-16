@@ -1,0 +1,18 @@
+#(para el backend / servidor)
+
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+python-multipart
+joblib
+scikit-learn
+pandas
+requests
+
+# Para Raspberry Pi (instalar con pip3 si es necesario)
+requests
+joblib
+Adafruit-BMP
+PythonDHT

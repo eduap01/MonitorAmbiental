@@ -2,6 +2,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Union
 
+
+# POST: Guarda ubicación actual recibida desde el frontend.
+# GET: Devuelve ubicación actual almacenada al frontend.
+
+
 router = APIRouter()
 
 class Ubicacion(BaseModel):
