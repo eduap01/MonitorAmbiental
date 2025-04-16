@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class MedicionBase(BaseModel):
     fecha_hora: datetime
@@ -7,6 +8,7 @@ class MedicionBase(BaseModel):
     humedad: float
     calidad_aire: float
     presion: float
+    prediccion: Optional[float] = None
 
 class MedicionCreate(MedicionBase):
     pass

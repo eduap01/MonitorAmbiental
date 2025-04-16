@@ -10,3 +10,4 @@ class Medicion(Base):
     humedad = Column(Numeric(5, 2), nullable=False)
     calidad_aire = Column(Numeric(5, 2), nullable=False)
     presion = Column(Numeric(7, 2), nullable=False)
+    prediccion = Column(Numeric(5, 2), nullable=True)
