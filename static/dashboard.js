@@ -41,27 +41,28 @@ let filtroCondicionalActivo = "";
 let modoComparacionActivo = false;
 let ultimoTimestamp = null;
 
-async function cargarDatos(tipo) {
-  tipoSeleccionado = tipo;
-
+async function cargarDatos(tipo = tipoSeleccionado) {
   try {
     const response = await fetch('/api/mediciones/');
     const datos = await response.json();
     datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
+    datosTotales = datos;
+    ultimoTimestamp = new Date(datos[datos.length - 1].fecha_hora).getTime();
 
-    if (!ultimoTimestamp) {
-      datosTotales = datos;
-      ultimoTimestamp = new Date(datos[datos.length - 1].fecha_hora).getTime();
+    // Recarga según el modo activo
+    if (modoComparacionActivo) {
+      compararVariables();
+    } else if (filtroCondicionalActivo !== "") {
+      aplicarFiltroCondicional();
+    } else {
       mostrarTodosEnGrafica(datosTotales, tipoSeleccionado);
-      return;
     }
-
-    const nuevos = datos.filter(d => new Date(d.fecha_hora).getTime() > ultimoTimestamp);
-    nuevos.forEach(dato => añadirNuevoPunto(dato, tipoSeleccionado));
   } catch (error) {
     console.error("Error al cargar los datos:", error);
   }
 }
+
+
 
 function mostrarTodosEnGrafica(datos, tipo) {
   const labels = datos.map(d => new Date(d.fecha_hora));
@@ -115,6 +116,14 @@ function actualizarUltimosValores() {
   document.getElementById("valor-aire").textContent = calidadTexto;
   document.getElementById("ultima-actualizacion").textContent =
     "Última actualización: " + new Date().toLocaleString('es-ES');
+
+  if (ultimo.prediccion !== undefined) {
+    document.getElementById("mensaje-prediccion").textContent =
+      `Predicción futura (+1h) generada con IA: ${ultimo.prediccion.toFixed(2)} °C`;
+  } else {
+    document.getElementById("mensaje-prediccion").textContent =
+      "Predicción no disponible.";
+  }
 }
 
 function aplicarFiltroCondicional() {
@@ -185,7 +194,7 @@ async function inicializarMapa() {
       attribution: '© OpenStreetMap contributors'
     }).addTo(mapa);
 
-    L.marker([lat, lon])
+    marcadorSensor = L.marker([lat, lon])
       .addTo(mapa)
       .bindPopup(`Raspberry Pi<br>${ciudad}, ${pais}`)
       .openPopup();
@@ -194,37 +203,30 @@ async function inicializarMapa() {
   }
 }
 
+
+let marcadorSensor = null;
+
 function centrarEnMiUbicacion() {
   if (!navigator.geolocation || !mapa) return;
+
   navigator.geolocation.getCurrentPosition(pos => {
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
+
     mapa.setView([lat, lon], 15);
+
+    // Si ya hay marcador, lo movemos; si no, lo creamos
+    if (marcadorSensor) {
+      marcadorSensor.setLatLng([lat, lon]);
+    } else {
+      marcadorSensor = L.marker([lat, lon])
+        .addTo(mapa)
+        .bindPopup("Tu ubicación actual")
+        .openPopup();
+    }
   });
 }
 
-function analizarTendencias() {
-  if (datosTotales.length < 6) {
-    document.getElementById("mensaje-prediccion").textContent = "Datos insuficientes para predicción.";
-    return;
-  }
-
-  const ultimos = datosTotales.slice(-24);
-  const t0 = ultimos[0];
-  const tN = ultimos[ultimos.length - 1];
-
-  let mensaje = "Sin cambios relevantes.";
-  if (tN.temperatura > t0.temperatura && tN.presion < t0.presion)
-    mensaje = "Posibilidad de lluvia próxima.";
-  else if (tN.humedad > 60 && tN.presion < t0.presion)
-    mensaje = "Humedad alta y presión baja. Posible niebla o lluvia.";
-  else if (tN.temperatura > t0.temperatura)
-    mensaje = "Temperatura en ascenso – posible calor.";
-  else if (tN.temperatura < t0.temperatura)
-    mensaje = "Temperatura descendiendo – condiciones frescas.";
-
-  document.getElementById("mensaje-prediccion").textContent = mensaje;
-}
 
 function filtrarPorFechaDesdeSidebar() {
   const fechaStr = document.getElementById("fecha-historial-sidebar").value;
@@ -293,6 +295,16 @@ function detenerActualizacion() {
   chart.data.datasets = [];
   chart.update();
   console.log("Actualización detenida");
+}
+
+function mostrarPanel(nombre) {
+  const paneles = ['comparar', 'filtrar', 'historial'];
+  paneles.forEach(p => {
+    const el = document.getElementById(`panel-${p}`);
+    if (el) {
+      el.style.display = (p === nombre) ? 'block' : 'none';
+    }
+  });
 }
 
 
