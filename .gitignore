@@ -1,1 +1,3 @@
 .idea/
+scripts/*.csv
+#Para no guardar ningún csv en GitHub
