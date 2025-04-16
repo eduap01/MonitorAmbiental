@@ -1,3 +1,7 @@
+
+# Configuración básica de conexión a PostgreSQL
+# Para scripts independientes que no usan SQLAlchemy (ej: exportar_datos.py)
+
 DATABASE_CONFIG = {
     "dbname": "monitoreo_ambiental",
     "user": "postgres",

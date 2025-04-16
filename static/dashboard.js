@@ -1,3 +1,4 @@
+// Inicializa la gráfica principal usando Chart.js
 const ctx = document.getElementById('grafica').getContext('2d');
 let chart = new Chart(ctx, {
   type: 'line',
@@ -28,6 +29,7 @@ let chart = new Chart(ctx, {
   }
 });
 
+// Colores para las diferentes variables
 const colores = {
   temperatura: 'rgba(255, 99, 132, 0.8)',
   humedad: 'rgba(54, 162, 235, 0.8)',
@@ -35,12 +37,14 @@ const colores = {
   calidad_aire: 'rgba(153, 102, 255, 0.8)'
 };
 
+// Variables de estado global
 let tipoSeleccionado = 'temperatura';
 let datosTotales = [];
 let filtroCondicionalActivo = "";
 let modoComparacionActivo = false;
 let ultimoTimestamp = null;
 
+// Carga datos desde la API y decide cómo mostrarlos en función del modo actual
 async function cargarDatos(tipo = tipoSeleccionado) {
   try {
     const response = await fetch('/api/mediciones/');
@@ -49,7 +53,6 @@ async function cargarDatos(tipo = tipoSeleccionado) {
     datosTotales = datos;
     ultimoTimestamp = new Date(datos[datos.length - 1].fecha_hora).getTime();
 
-    // Recarga según el modo activo
     if (modoComparacionActivo) {
       compararVariables();
     } else if (filtroCondicionalActivo !== "") {
@@ -62,8 +65,7 @@ async function cargarDatos(tipo = tipoSeleccionado) {
   }
 }
 
-
-
+// Muestra una única variable ambiental en el gráfico (ej. temperatura)
 function mostrarTodosEnGrafica(datos, tipo) {
   const labels = datos.map(d => new Date(d.fecha_hora));
   const valores = datos.map(d => d[tipo]);
@@ -81,6 +83,7 @@ function mostrarTodosEnGrafica(datos, tipo) {
   actualizarUltimosValores();
 }
 
+// Añade un nuevo punto al gráfico en tiempo real
 function añadirNuevoPunto(dato, tipo) {
   const t = new Date(dato.fecha_hora);
   const valor = dato[tipo];
@@ -100,6 +103,7 @@ function añadirNuevoPunto(dato, tipo) {
   actualizarUltimosValores();
 }
 
+// Actualiza los valores mostrados debajo del gráfico
 function actualizarUltimosValores() {
   const ultimo = datosTotales[datosTotales.length - 1];
   if (!ultimo) return;
@@ -126,6 +130,7 @@ function actualizarUltimosValores() {
   }
 }
 
+// Aplica un filtro condicional (temperatura > 30, humedad < 50, calidad_aire = 0)
 function aplicarFiltroCondicional() {
   const condicion = document.getElementById("filtro-condicion").value;
   filtroCondicionalActivo = condicion;
@@ -139,6 +144,7 @@ function aplicarFiltroCondicional() {
   mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
 }
 
+// Limpia el filtro condicional y vuelve a mostrar la vista orignal
 function limpiarFiltro() {
   filtroCondicionalActivo = "";
   document.getElementById("filtro-condicion").value = "";
@@ -146,6 +152,7 @@ function limpiarFiltro() {
   modoComparacionActivo = false;
 }
 
+// Muestra dos variables en la misma gráfica para compararlas
 function compararVariables() {
   modoComparacionActivo = true;
   const v1 = document.getElementById("variable1").value;
@@ -179,6 +186,7 @@ function compararVariables() {
   chart.update();
 }
 
+// Carga el mapa y muestra la ubicación de la Raspberry Pi
 let mapa = null;
 async function inicializarMapa() {
   try {
@@ -203,9 +211,8 @@ async function inicializarMapa() {
   }
 }
 
-
+// Centra el mapa en la ubicación actual del usuario (geolocalización navegador)
 let marcadorSensor = null;
-
 function centrarEnMiUbicacion() {
   if (!navigator.geolocation || !mapa) return;
 
@@ -215,7 +222,6 @@ function centrarEnMiUbicacion() {
 
     mapa.setView([lat, lon], 15);
 
-    // Si ya hay marcador, lo movemos; si no, lo creamos
     if (marcadorSensor) {
       marcadorSensor.setLatLng([lat, lon]);
     } else {
@@ -227,7 +233,7 @@ function centrarEnMiUbicacion() {
   });
 }
 
-
+// Filtra los datos mostrados por una fecha específica desde el sidebar
 function filtrarPorFechaDesdeSidebar() {
   const fechaStr = document.getElementById("fecha-historial-sidebar").value;
   if (!fechaStr) return alert("Selecciona una fecha para ver el historial.");
@@ -248,6 +254,7 @@ function filtrarPorFechaDesdeSidebar() {
   mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
 }
 
+// Alterna entre modo claro y modo oscuro
 function alternarModo() {
   const body = document.body;
   const btn = document.getElementById("btn-modo");
@@ -256,6 +263,7 @@ function alternarModo() {
   btn.textContent = body.classList.contains('dark') ? "Modo día" : "Modo noche";
 }
 
+// Muestra u oculta un submenú lateral
 function toggleSubmenu(id) {
   document.querySelectorAll('.submenu').forEach(el => {
     if (el.id !== id) el.classList.add('oculto');
@@ -264,18 +272,17 @@ function toggleSubmenu(id) {
   if (target) target.classList.toggle('oculto');
 }
 
+// Manejo del intervalo de actualización automática
 let intervaloActual = null;
 
-// Lanzar actualizaciones (si no está ya activo)
 function lanzarActualizacion() {
   if (!intervaloActual) {
-    cargarDatos(tipoSeleccionado); // Carga inicial al lanzar
+    cargarDatos(tipoSeleccionado);
     intervaloActual = setInterval(() => cargarDatos(tipoSeleccionado), 10000);
     console.log("Actualización lanzada");
   }
 }
 
-// Pausar: detener el intervalo pero sin limpiar datos
 function pausarActualizacion() {
   if (intervaloActual) {
     clearInterval(intervaloActual);
@@ -284,19 +291,18 @@ function pausarActualizacion() {
   }
 }
 
-// Detener: detener intervalo y limpiar gráfico
 function detenerActualizacion() {
   if (intervaloActual) {
     clearInterval(intervaloActual);
     intervaloActual = null;
   }
-  // Vaciar el gráfico
   chart.data.labels = [];
   chart.data.datasets = [];
   chart.update();
   console.log("Actualización detenida");
 }
 
+// Muestra un panel lateral y oculta los demás (Comparar, Filtrar, Historial)
 function mostrarPanel(nombre) {
   const paneles = ['comparar', 'filtrar', 'historial'];
   paneles.forEach(p => {
@@ -307,18 +313,14 @@ function mostrarPanel(nombre) {
   });
 }
 
-
+// Inicializa el sistema al cargar la página
 window.addEventListener("load", async () => {
   cargarDatos("temperatura");
   lanzarActualizacion();
   await inicializarMapa();
 
-  // Vincular botón modo noche
   const btnModo = document.getElementById("btn-modo");
   if (btnModo) {
     btnModo.addEventListener("click", alternarModo);
   }
 });
-
-
-
