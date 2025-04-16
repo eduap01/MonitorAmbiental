@@ -249,9 +249,14 @@ function filtrarPorFechaDesdeSidebar() {
 function alternarModo() {
   const body = document.body;
   const btn = document.getElementById("btn-modo");
+
   body.classList.toggle('dark');
   btn.textContent = body.classList.contains('dark') ? "Modo día" : "Modo noche";
 }
+
+
+
+
 
 function toggleSubmenu(id) {
   document.querySelectorAll('.submenu').forEach(el => {
@@ -261,8 +266,19 @@ function toggleSubmenu(id) {
   if (target) target.classList.toggle('oculto');
 }
 
+
+
 window.addEventListener("load", async () => {
   cargarDatos("temperatura");
   setInterval(() => cargarDatos(tipoSeleccionado), 10000);
   await inicializarMapa();
+
+  // Vincular botón modo noche
+  const btnModo = document.getElementById("btn-modo");
+  if (btnModo) {
+    btnModo.addEventListener("click", alternarModo);
+  }
 });
+
+
+

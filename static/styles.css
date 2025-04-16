@@ -13,7 +13,6 @@ body {
 }
 
 .sidebar-app {
-  width: 200px;
   background-color: #1e1e1e;
   color: white;
   display: flex;
@@ -78,16 +77,31 @@ h1 {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   text-align: center;
-  min-width: 120px;
-  flex: 1;
-  margin: 0.5rem;
+  height: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .tarjeta span {
-  font-size: 1.8rem;
+  font-size: 1.5rem; /* Reducimos un poco */
   font-weight: 500;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
+
+.tarjeta small {
+  display: block;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+
 
 .panel {
   background-color: #fff;
@@ -122,8 +136,10 @@ button:hover {
 
 .actualizacion {
   text-align: center;
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #4682b4 !important;
 }
 
 /* --------------------- Modo oscuro completo --------------------- */
@@ -153,7 +169,7 @@ body.dark .contenido-app {
 }
 
 body.dark .actualizacion {
-  color: #aaa;
+  color: #ffa726 !important; /* naranja en modo oscuro */
 }
 
 body.dark select,
@@ -194,14 +210,20 @@ body.dark .actualizacion {
 }
 
 .submenu {
-  background-color: #f0f0f0;         /* gris claro para modo claro */
-  border-left: 4px solid #999;       /* gris oscuro como acento */
+  background-color: #c7c7c7; /* gris más oscuro que #dcdcdc */
+  border-left: 4px solid #4682b4;     /* gris oscuro como acento */
   padding: 0.75rem 1rem;
   margin-top: 0.5rem;
   border-radius: 6px;
   transition: max-height 0.3s ease, opacity 0.3s ease;
   overflow: hidden;
 }
+
+.submenu button:hover {
+  background-color: #4682b4!important;
+  color: #fff !important;
+}
+
 
 .submenu.oculto {
   max-height: 0;
@@ -219,6 +241,69 @@ body.dark .actualizacion {
 body.dark .submenu {
   background-color: #2b2b2b;
   border-left: 4px solid #ff9800;   /* igual que el texto de última actualización */
+}
+
+.logo {
+  color: #4682b4 !important; /* Azul suave en modo claro */
+  font-weight: bold;
+}
+
+body.dark .logo {
+  color: #ffa726 !important; /* Naranja en modo oscuro */
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar-app {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .sidebar-app .logo {
+    font-size: 1.2rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .sidebar-app .menu {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .sidebar-app .menu button {
+    flex: 1 1 auto;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .submenu {
+    width: 100%;
+  }
+
+  .contenido-app {
+    padding: 1rem;
+  }
+
+  .tarjetas {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tarjeta {
+    width: 90%;
+    margin: 0.5rem 0;
+  }
 }
 
 

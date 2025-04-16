@@ -5,103 +5,134 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Monitor Ambiental</title>
 
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+
   <!-- Estilos locales -->
   <link rel="stylesheet" href="/static/css/leaflet.css" />
   <link rel="stylesheet" href="/static/css/roboto.css" />
   <link rel="stylesheet" href="/static/styles.css" />
-
-  <!-- Scripts locales -->
   <script src="/static/js/chart.js"></script>
   <script src="/static/js/leaflet.js"></script>
+  <script src="/static/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-  <div class="layout">
-    <!-- Sidebar izquierdo -->
-    <aside class="sidebar-app">
-      <div class="logo">Panel de control</div>
-      <nav class="menu">
-        <button onclick="cargarDatos('temperatura')">Temperatura</button>
-        <button onclick="cargarDatos('humedad')">Humedad</button>
-        <button onclick="cargarDatos('presion')">Presión</button>
-        <button onclick="cargarDatos('calidad_aire')">Aire</button>
-        <hr />
+  <div class="container-fluid">
+    <div class="row flex-wrap">
+      <!-- Sidebar -->
+      <!-- Sidebar -->
+<aside class="col-12 col-md-3 col-xl-2 sidebar-app">
 
-        <!-- Submenú Comparar -->
-        <button onclick="toggleSubmenu('submenu-comparar')">Comparar ▾</button>
-        <div id="submenu-comparar" class="submenu oculto">
-          <select id="variable1">
-            <option value="temperatura">Temperatura</option>
-            <option value="humedad">Humedad</option>
-            <option value="presion">Presión</option>
-            <option value="calidad_aire">Calidad del aire</option>
-          </select>
-          <span>vs.</span>
-          <select id="variable2">
-            <option value="humedad">Humedad</option>
-            <option value="temperatura">Temperatura</option>
-            <option value="presion">Presión</option>
-            <option value="calidad_aire">Calidad del aire</option>
-          </select>
-          <button onclick="compararVariables()">Comparar</button>
+        <div class="logo">Panel de control</div>
+        <nav class="menu">
+          <button onclick="cargarDatos('temperatura')">Temperatura</button>
+          <button onclick="cargarDatos('humedad')">Humedad</button>
+          <button onclick="cargarDatos('presion')">Presión</button>
+          <button onclick="cargarDatos('calidad_aire')">Aire</button>
+          <hr />
+
+          <!-- Submenú Comparar -->
+          <button onclick="toggleSubmenu('submenu-comparar')">Comparar ▾</button>
+          <div id="submenu-comparar" class="submenu oculto">
+            <select id="variable1" class="form-select mb-2">
+              <option value="temperatura">Temperatura</option>
+              <option value="humedad">Humedad</option>
+              <option value="presion">Presión</option>
+              <option value="calidad_aire">Calidad del aire</option>
+            </select>
+            <select id="variable2" class="form-select mb-2">
+              <option value="humedad">Humedad</option>
+              <option value="temperatura">Temperatura</option>
+              <option value="presion">Presión</option>
+              <option value="calidad_aire">Calidad del aire</option>
+            </select>
+            <button class="btn btn-primary w-100" onclick="compararVariables()">Comparar</button>
+          </div>
+
+          <!-- Submenú Filtrar -->
+          <button onclick="toggleSubmenu('submenu-filtrar')">Filtrar ▾</button>
+          <div id="submenu-filtrar" class="submenu oculto">
+            <select id="filtro-condicion" class="form-select mb-2">
+              <option value="">Sin filtro</option>
+              <option value="temp_gt_30">Temperatura > 30°C</option>
+              <option value="hum_lt_50">Humedad < 50%</option>
+              <option value="aire_malo">Calidad de aire mala</option>
+            </select>
+            <button class="btn btn-primary mb-1 w-100" onclick="aplicarFiltroCondicional()">Filtrar</button>
+            <button class="btn btn-secondary w-100" onclick="limpiarFiltro()">Limpiar</button>
+          </div>
+
+          <!-- Submenú Historial -->
+          <button onclick="toggleSubmenu('submenu-historial')">Historial ▾</button>
+          <div id="submenu-historial" class="submenu oculto">
+            <label for="fecha-historial-sidebar">Fecha:</label>
+            <input type="date" id="fecha-historial-sidebar" class="form-control mb-2" />
+            <button class="btn btn-primary w-100" onclick="filtrarPorFechaDesdeSidebar()">Ver</button>
+          </div>
+
+          <hr />
+          <button id="btn-modo">Modo noche</button>
+        </nav>
+      </aside>
+
+      <!-- Contenido principal -->
+      <!-- Contenido principal -->
+<main class="col-12 col-md-9 col-xl-10 contenido-app">
+
+        <div class="container-fluid">
+          <h1 class="text-center">Monitor Ambiental</h1>
+          <p class="actualizacion text-center" id="ultima-actualizacion">Última actualización: --</p>
+
+          <!-- Tarjetas responsivas -->
+         <div class="row tarjetas text-center">
+            <div class="col-6 col-sm-6 col-md-3 mb-3">
+              <div class="tarjeta">
+                <span id="valor-temp">--</span>
+                <small>Temperatura</small>
+              </div>
+            </div>
+            <div class="col-6 col-sm-6 col-md-3 mb-3">
+              <div class="tarjeta">
+                <span id="valor-humedad">--</span>
+                <small>Humedad</small>
+              </div>
+            </div>
+            <div class="col-6 col-sm-6 col-md-3 mb-3">
+              <div class="tarjeta">
+                <span id="valor-presion">--</span>
+                <small>Presión</small>
+              </div>
+            </div>
+            <div class="col-6 col-sm-6 col-md-3 mb-3">
+              <div class="tarjeta">
+                <span id="valor-aire">--</span>
+                <small>Calidad del aire</small>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="panel prediccion mt-4">
+            <h2>Predicción</h2>
+            <p id="mensaje-prediccion">Calculando predicción...</p>
+          </div>
+
+          <div class="panel">
+            <h2>Gráfica</h2>
+            <canvas id="grafica"></canvas>
+          </div>
+
+          <div class="panel">
+            <h2>Ubicación del sensor</h2>
+            <div id="mapa"></div>
+            <button id="btn-centro" class="btn btn-primary mt-2" onclick="centrarEnMiUbicacion()">Centrar en mi ubicación</button>
+          </div>
         </div>
-
-        <!-- Submenú Filtrar -->
-        <button onclick="toggleSubmenu('submenu-filtrar')">Filtrar ▾</button>
-        <div id="submenu-filtrar" class="submenu oculto">
-          <select id="filtro-condicion">
-            <option value="">— Filtro condicional —</option>
-            <option value="temp_gt_30">Temperatura > 30°C</option>
-            <option value="hum_lt_50">Humedad < 50%</option>
-            <option value="aire_malo">Calidad de aire mala</option>
-          </select>
-          <button onclick="aplicarFiltroCondicional()">Filtrar</button>
-          <button onclick="limpiarFiltro()">Limpiar</button>
-        </div>
-
-        <!-- Submenú Historial -->
-        <button onclick="toggleSubmenu('submenu-historial')">Historial ▾</button>
-        <div id="submenu-historial" class="submenu oculto">
-          <label for="fecha-historial-sidebar">Fecha:</label>
-          <input type="date" id="fecha-historial-sidebar" />
-          <button onclick="filtrarPorFechaDesdeSidebar()">Ver</button>
-        </div>
-
-        <hr />
-        <button id="btn-modo">Modo oscuro</button>
-      </nav>
-    </aside>
-
-    <!-- Contenido principal -->
-    <main class="contenido-app">
-      <div class="container">
-        <h1>Monitor Ambiental</h1>
-        <p class="actualizacion" id="ultima-actualizacion">Última actualización: --</p>
-
-        <div class="tarjetas">
-          <div class="tarjeta"><span id="valor-temp">--</span><small>Temperatura</small></div>
-          <div class="tarjeta"><span id="valor-humedad">--</span><small>Humedad</small></div>
-          <div class="tarjeta"><span id="valor-presion">--</span><small>Presión</small></div>
-          <div class="tarjeta"><span id="valor-aire">--</span><small>Calidad del aire</small></div>
-        </div>
-
-        <div class="panel prediccion">
-          <h2>Predicción</h2>
-          <p id="mensaje-prediccion">Calculando predicción...</p>
-        </div>
-
-        <div class="panel">
-          <h2>Gráfica</h2>
-          <canvas id="grafica"></canvas>
-        </div>
-
-        <div class="panel">
-          <h2>Ubicación del sensor</h2>
-          <div id="mapa"></div>
-          <button id="btn-centro" onclick="centrarEnMiUbicacion()">Centrar en mi ubicación</button>
-        </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
+
   <script src="/static/dashboard.js" defer></script>
 </body>
 </html>
