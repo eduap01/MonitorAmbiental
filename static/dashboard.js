@@ -254,10 +254,6 @@ function alternarModo() {
   btn.textContent = body.classList.contains('dark') ? "Modo día" : "Modo noche";
 }
 
-
-
-
-
 function toggleSubmenu(id) {
   document.querySelectorAll('.submenu').forEach(el => {
     if (el.id !== id) el.classList.add('oculto');
@@ -266,11 +262,43 @@ function toggleSubmenu(id) {
   if (target) target.classList.toggle('oculto');
 }
 
+let intervaloActual = null;
+
+// Lanzar actualizaciones (si no está ya activo)
+function lanzarActualizacion() {
+  if (!intervaloActual) {
+    cargarDatos(tipoSeleccionado); // Carga inicial al lanzar
+    intervaloActual = setInterval(() => cargarDatos(tipoSeleccionado), 10000);
+    console.log("Actualización lanzada");
+  }
+}
+
+// Pausar: detener el intervalo pero sin limpiar datos
+function pausarActualizacion() {
+  if (intervaloActual) {
+    clearInterval(intervaloActual);
+    intervaloActual = null;
+    console.log("Actualización pausada");
+  }
+}
+
+// Detener: detener intervalo y limpiar gráfico
+function detenerActualizacion() {
+  if (intervaloActual) {
+    clearInterval(intervaloActual);
+    intervaloActual = null;
+  }
+  // Vaciar el gráfico
+  chart.data.labels = [];
+  chart.data.datasets = [];
+  chart.update();
+  console.log("Actualización detenida");
+}
 
 
 window.addEventListener("load", async () => {
   cargarDatos("temperatura");
-  setInterval(() => cargarDatos(tipoSeleccionado), 10000);
+  lanzarActualizacion();
   await inicializarMapa();
 
   // Vincular botón modo noche

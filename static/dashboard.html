@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Monitor Ambiental</title>
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
 
   <!-- Bootstrap -->
   <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/css/bootstrap-icons.css" />
 
   <!-- Estilos locales -->
   <link rel="stylesheet" href="/static/css/leaflet.css" />
@@ -72,6 +74,19 @@
 
           <hr />
           <button id="btn-modo">Modo noche</button>
+          <div class="d-flex gap-2 justify-content-center mb-4">
+              <button class="btn btn-success" onclick="lanzarActualizacion()" title="Lanzar">
+                <i class="bi bi-play-fill"></i>
+              </button>
+              <button class="btn btn-warning" onclick="pausarActualizacion()" title="Pausar">
+                <i class="bi bi-pause-fill"></i>
+              </button>
+              <button class="btn btn-danger" onclick="detenerActualizacion()" title="Detener">
+                <i class="bi bi-stop-fill"></i>
+              </button>
+          </div>
+
+
         </nav>
       </aside>
 
