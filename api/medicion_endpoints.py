@@ -6,6 +6,9 @@ from pydantic_models.MedicionPydantic import MedicionCreate, Medicion
 from database import SessionLocal
 from sqlalchemy import desc
 
+# POST: Añade una nueva medición recibida desde la Raspberry Pi.
+# GET: Devuelve las últimas 200 mediciones ordenadas por fecha más reciente.
+
 router = APIRouter()
 
 def get_db():
