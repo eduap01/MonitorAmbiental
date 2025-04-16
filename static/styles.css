@@ -1,0 +1,312 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f2f4f7;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar-app {
+  background-color: #1e1e1e;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.sidebar-app .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.sidebar-app .menu button {
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-app .menu button:hover {
+  background-color: #333;
+}
+
+.sidebar-app hr {
+  margin: 1rem 0;
+  border: 0.5px solid #444;
+}
+
+.contenido-app {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f2f4f7;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 700;
+}
+
+.tarjetas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+}
+
+.tarjeta {
+  background-color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  height: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.tarjeta span {
+  font-size: 1.5rem; /* Reducimos un poco */
+  font-weight: 500;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.tarjeta small {
+  display: block;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+
+
+.panel {
+  background-color: #fff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+select, input[type="date"], button {
+  padding: 0.5rem;
+  border-radius: 5px;
+  margin: 0.3rem;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#mapa {
+  height: 300px;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.actualizacion {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #4682b4 !important;
+}
+
+/* --------------------- Modo oscuro completo --------------------- */
+
+body.dark {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+body.dark .panel,
+body.dark .tarjeta {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+}
+
+body.dark .sidebar-app {
+  background-color: #000000;
+  color: #f5f5f5;
+}
+
+body.dark .sidebar-app .menu button:hover {
+  background-color: #222;
+}
+
+body.dark .contenido-app {
+  background-color: #181818;
+}
+
+body.dark .actualizacion {
+  color: #ffa726 !important; /* naranja en modo oscuro */
+}
+
+body.dark select,
+body.dark input[type="date"],
+body.dark button {
+  background-color: #222;
+  color: #f5f5f5;
+  border-color: #444;
+}
+
+body.dark button:hover {
+  background-color: #333;
+}
+
+body.dark h1,
+body.dark h2,
+body.dark label,
+body.dark small {
+  color: #f5f5f5;
+}
+
+.actualizacion {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #000000;
+}
+
+body.dark .actualizacion {
+  color: #ffa726;
+}
+
+#panel-comparar,
+#panel-filtrar,
+#panel-historial {
+  display: none;
+}
+
+.submenu {
+  background-color: #c7c7c7; /* gris más oscuro que #dcdcdc */
+  border-left: 4px solid #4682b4;     /* gris oscuro como acento */
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.submenu button:hover {
+  background-color: #4682b4!important;
+  color: #fff !important;
+}
+
+
+.submenu.oculto {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.submenu:not(.oculto) {
+  max-height: 500px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.dark .submenu {
+  background-color: #2b2b2b;
+  border-left: 4px solid #ff9800;   /* igual que el texto de última actualización */
+}
+
+.logo {
+  color: #4682b4 !important; /* Azul suave en modo claro */
+  font-weight: bold;
+}
+
+body.dark .logo {
+  color: #ffa726 !important; /* Naranja en modo oscuro */
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar-app {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .sidebar-app .logo {
+    font-size: 1.2rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .sidebar-app .menu {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .sidebar-app .menu button {
+    flex: 1 1 auto;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .submenu {
+    width: 100%;
+  }
+
+  .contenido-app {
+    padding: 1rem;
+  }
+
+  .tarjetas {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tarjeta {
+    width: 90%;
+    margin: 0.5rem 0;
+  }
+}
+
+
+
+
+
