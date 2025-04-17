@@ -38,4 +38,4 @@ modelo.fit(X_train, y_train)
 
 # Guardar el modelo
 dump(modelo, 'modelo_temp_rpi.joblib')
-print("✅ Modelo entrenado y guardado como modelo_temp_rpi.joblib")
+print("Modelo entrenado y guardado como modelo_temp_rpi.joblib")
