@@ -33,7 +33,7 @@ let chart = new Chart(ctx, {
 const colores = {
   temperatura: 'rgba(255, 99, 132, 0.8)',
   humedad: 'rgba(54, 162, 235, 0.8)',
-  presion: 'rgba(75, 192, 192, 0.8)',
+  presion: 'rgba(144, 238, 144, 0.9)',
   calidad_aire: 'rgba(153, 102, 255, 0.8)'
 };
 
@@ -43,27 +43,59 @@ let datosTotales = [];
 let filtroCondicionalActivo = "";
 let modoComparacionActivo = false;
 let ultimoTimestamp = null;
+let fechaFiltrada = null; //guarda la fecha seleccionada
 
-// Carga datos desde la API y decide cómo mostrarlos en función del modo actual
+
 async function cargarDatos(tipo = tipoSeleccionado) {
   try {
     const response = await fetch('/api/mediciones/');
     const datos = await response.json();
     datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
     datosTotales = datos;
-    ultimoTimestamp = new Date(datos[datos.length - 1].fecha_hora).getTime();
+    tipoSeleccionado = tipo;
 
-    if (modoComparacionActivo) {
-      compararVariables();
-    } else if (filtroCondicionalActivo !== "") {
-      aplicarFiltroCondicional();
-    } else {
-      mostrarTodosEnGrafica(datosTotales, tipoSeleccionado);
-    }
+    filtroCondicionalActivo = "";
+    fechaFiltrada = null;
+    modoComparacionActivo = false;
+    document.getElementById("filtro-condicion").value = "";
+    document.getElementById("fecha-historial-sidebar").value = "";
+
+    // Mostrar la vista normal
+    mostrarTodosEnGrafica(obtenerDatosFiltrados(), tipoSeleccionado);
+
   } catch (error) {
     console.error("Error al cargar los datos:", error);
   }
 }
+
+
+
+function obtenerDatosFiltrados() {
+  let datos = [...datosTotales];
+
+  // Aplicar filtro por fecha si existe
+  if (fechaFiltrada) {
+    const inicio = new Date(fechaFiltrada);
+    const fin = new Date(fechaFiltrada);
+    fin.setHours(23, 59, 59, 999);
+    datos = datos.filter(d => {
+      const f = new Date(d.fecha_hora);
+      return f >= inicio && f <= fin;
+    });
+  }
+
+  // Aplicar filtro condicional si existe
+  if (filtroCondicionalActivo === "temp_gt_30") {
+    datos = datos.filter(d => d.temperatura > 30);
+  } else if (filtroCondicionalActivo === "hum_lt_50") {
+    datos = datos.filter(d => d.humedad < 50);
+  } else if (filtroCondicionalActivo === "aire_malo") {
+    datos = datos.filter(d => d.calidad_aire === 0);
+  }
+
+  return datos;
+}
+
 
 // Muestra una única variable ambiental en el gráfico (ej. temperatura)
 function mostrarTodosEnGrafica(datos, tipo) {
@@ -106,6 +138,7 @@ function añadirNuevoPunto(dato, tipo) {
 // Actualiza los valores mostrados debajo del gráfico
 function actualizarUltimosValores() {
   const ultimo = datosTotales[datosTotales.length - 1];
+  console.log(ultimo);
   if (!ultimo) return;
 
   document.getElementById("valor-temp").textContent = `${ultimo.temperatura} °C`;
@@ -121,28 +154,40 @@ function actualizarUltimosValores() {
   document.getElementById("ultima-actualizacion").textContent =
     "Última actualización: " + new Date().toLocaleString('es-ES');
 
-  if (ultimo.prediccion !== undefined) {
-    document.getElementById("mensaje-prediccion").textContent =
-      `Predicción futura (+1h) generada con IA: ${ultimo.prediccion.toFixed(2)} °C`;
-  } else {
-    document.getElementById("mensaje-prediccion").textContent =
-      "Predicción no disponible.";
-  }
+    if (ultimo.prediccion !== undefined) {
+      document.getElementById("mensaje-prediccion").textContent =
+        `Predicción futura (+1h) generada con IA: ${ultimo.prediccion.toFixed(2)} °C`;
+    } else {
+      document.getElementById("mensaje-prediccion").textContent =
+        "Predicción no disponible.";
+    }
+
 }
+
+function mostrarToast(mensaje, color = "bg-primary") {
+  const toastEl = document.getElementById("liveToast");
+  const toastBody = document.getElementById("toast-body");
+
+  // Cambiar mensaje y color
+  toastBody.textContent = mensaje;
+  toastEl.className = `toast align-items-center text-white ${color} border-0`;
+
+  // Mostrar toast usando Bootstrap
+  const toast = new bootstrap.Toast(toastEl);
+  toast.show();
+}
+
 
 // Aplica un filtro condicional (temperatura > 30, humedad < 50, calidad_aire = 0)
 function aplicarFiltroCondicional() {
   const condicion = document.getElementById("filtro-condicion").value;
   filtroCondicionalActivo = condicion;
 
-  let filtrados = [...datosTotales];
-  if (condicion === "temp_gt_30") filtrados = filtrados.filter(d => d.temperatura > 30);
-  else if (condicion === "hum_lt_50") filtrados = filtrados.filter(d => d.humedad < 50);
-  else if (condicion === "aire_malo") filtrados = filtrados.filter(d => d.calidad_aire === 0);
-
+  const filtrados = obtenerDatosFiltrados();
   if (filtrados.length === 0) return alert("No hay datos que cumplan esa condición.");
   mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
 }
+
 
 // Limpia el filtro condicional y vuelve a mostrar la vista orignal
 function limpiarFiltro() {
@@ -160,9 +205,10 @@ function compararVariables() {
 
   if (v1 === v2) return alert("Selecciona dos variables diferentes para comparar.");
 
-  const labels = datosTotales.map(d => new Date(d.fecha_hora));
-  const datos1 = datosTotales.map(d => d[v1]);
-  const datos2 = datosTotales.map(d => d[v2]);
+  const datos = obtenerDatosFiltrados();
+  const labels = datos.map(d => new Date(d.fecha_hora));
+  const datos1 = datos.map(d => d[v1]);
+  const datos2 = datos.map(d => d[v2]);
 
   chart.data.labels = labels;
   chart.data.datasets = [
@@ -185,6 +231,7 @@ function compararVariables() {
   ];
   chart.update();
 }
+
 
 // Carga el mapa y muestra la ubicación de la Raspberry Pi
 let mapa = null;
@@ -238,21 +285,21 @@ function filtrarPorFechaDesdeSidebar() {
   const fechaStr = document.getElementById("fecha-historial-sidebar").value;
   if (!fechaStr) return alert("Selecciona una fecha para ver el historial.");
 
-  const inicio = new Date(fechaStr);
-  const fin = new Date(fechaStr);
-  fin.setHours(23, 59, 59, 999);
+  fechaFiltrada = fechaStr;
 
-  const filtrados = datosTotales.filter(d => {
-    const fecha = new Date(d.fecha_hora);
-    return fecha >= inicio && fecha <= fin;
-  });
-
+  const filtrados = obtenerDatosFiltrados();
   if (filtrados.length === 0) return alert("No hay datos para esa fecha.");
 
-  modoComparacionActivo = false;
-  filtroCondicionalActivo = "";
-  mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
+  // Solo ejecuta una de las dos formas de mostrar datos
+  if (modoComparacionActivo) {
+    compararVariables(); // mantiene la comparación con los nuevos datos filtrados
+  } else {
+    mostrarTodosEnGrafica(filtrados, tipoSeleccionado); // muestra una sola variable
+  }
 }
+
+
+
 
 // Alterna entre modo claro y modo oscuro
 function alternarModo() {
@@ -261,6 +308,8 @@ function alternarModo() {
 
   body.classList.toggle('dark');
   btn.textContent = body.classList.contains('dark') ? "Modo día" : "Modo noche";
+
+  localStorage.setItem("modoOscuro", modoOscuro ? "true" : "false");
 }
 
 // Muestra u oculta un submenú lateral
@@ -272,14 +321,37 @@ function toggleSubmenu(id) {
   if (target) target.classList.toggle('oculto');
 }
 
+async function refrescarVistaActual() {
+  try {
+    const response = await fetch('/api/mediciones/');
+    const datos = await response.json();
+    datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
+    datosTotales = datos;
+
+    const filtrados = obtenerDatosFiltrados();
+
+    if (modoComparacionActivo) {
+      compararVariables();
+    } else {
+      mostrarTodosEnGrafica(filtrados, tipoSeleccionado);
+    }
+  } catch (error) {
+    console.error("Error actualizando datos:", error);
+  }
+}
+
+
+
 // Manejo del intervalo de actualización automática
 let intervaloActual = null;
 
 function lanzarActualizacion() {
   if (!intervaloActual) {
-    cargarDatos(tipoSeleccionado);
-    intervaloActual = setInterval(() => cargarDatos(tipoSeleccionado), 10000);
-    console.log("Actualización lanzada");
+    refrescarVistaActual();
+    intervaloActual = setInterval(refrescarVistaActual, 10000);
+    mostrarToast("Actualización lanzada", "bg-success");
+  } else {
+    mostrarToast("La actualización ya está activa", "bg-secondary");
   }
 }
 
@@ -287,7 +359,7 @@ function pausarActualizacion() {
   if (intervaloActual) {
     clearInterval(intervaloActual);
     intervaloActual = null;
-    console.log("Actualización pausada");
+    mostrarToast("Actualización pausada", "bg-warning");
   }
 }
 
@@ -299,8 +371,9 @@ function detenerActualizacion() {
   chart.data.labels = [];
   chart.data.datasets = [];
   chart.update();
-  console.log("Actualización detenida");
+  mostrarToast("Actualización detenida", "bg-danger");
 }
+
 
 // Muestra un panel lateral y oculta los demás (Comparar, Filtrar, Historial)
 function mostrarPanel(nombre) {
@@ -314,13 +387,45 @@ function mostrarPanel(nombre) {
 }
 
 // Inicializa el sistema al cargar la página
-window.addEventListener("load", async () => {
-  cargarDatos("temperatura");
+window.addEventListener("DOMContentLoaded", async () => {
+  const modoGuardado = localStorage.getItem("modoOscuro");
+  const body = document.body;
+  const btn = document.getElementById("btn-modo");
+
+  if (modoGuardado === "true") {
+    body.classList.add("dark");
+    if (btn) btn.textContent = "Modo día";
+  } else {
+    if (btn) btn.textContent = "Modo noche";
+  }
+
+  tipoSeleccionado = "temperatura";
+
+  // ✅ Cargar los datos desde la API al iniciar
+  try {
+    const response = await fetch('/api/mediciones/');
+    const datos = await response.json();
+    datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
+    datosTotales = datos;
+    refrescarVistaActual(); // ✅ Mostrar los datos iniciales
+  } catch (error) {
+    console.error("Error al cargar datos iniciales:", error);
+  }
+
+  // Luego se lanza el refresco automático
   lanzarActualizacion();
+
   await inicializarMapa();
 
-  const btnModo = document.getElementById("btn-modo");
-  if (btnModo) {
-    btnModo.addEventListener("click", alternarModo);
+  if (btn) {
+    btn.addEventListener("click", () => {
+      body.classList.toggle("dark");
+      const esOscuro = body.classList.contains("dark");
+      btn.textContent = esOscuro ? "Modo día" : "Modo noche";
+      localStorage.setItem("modoOscuro", esOscuro ? "true" : "false");
+    });
   }
 });
+
+
+

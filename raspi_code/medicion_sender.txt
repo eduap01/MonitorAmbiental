@@ -1,0 +1,34 @@
+import requests
+from datetime import datetime
+
+class MedicionSender:
+    def __init__(self, ip_pc):
+        self.url = f"http://{ip_pc}:8000/api/mediciones/"
+
+    def send_data(self, temperatura, humedad, calidad_aire, presion):
+        data = {
+            "fecha_hora": datetime.now().isoformat(),
+            "temperatura": temperatura,
+            "humedad": humedad,
+            "calidad_aire": calidad_aire,
+            "presion": presion
+        }
+
+        try:
+            response = requests.post(self.url, json=data)
+            if response.status_code == 200:
+                print("Datos enviados correctamente.")
+            else:
+                print(f"Error al enviar datos: {response.status_code} {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error al enviar datos: {e}")
+
+    def send_json(self, data):
+        try:
+            response = requests.post(self.url, json=data)
+            if response.status_code == 200:
+                print("Datos enviados correctamente con predicción.")
+            else:
+                print(f"Error al enviar datos: {response.status_code} {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error al enviar datos: {e}")
