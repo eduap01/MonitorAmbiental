@@ -1,0 +1,15 @@
+from sensor_reader import SensorReader
+from medicion_sender import MedicionSender
+from geo_sender import enviar_ubicacion
+import board
+
+# Enviar ubicación al inicio
+enviar_ubicacion()
+
+# Dirección IP de la PC receptora
+sender = MedicionSender(ip_pc="192.168.1.41")  # casa
+# sender = MedicionSender(ip_pc="192.168.150.221")  # clase
+
+# Inicializar lector de sensores
+sensor_reader = SensorReader(dht_pin=board.D4, mq_pin=17, sender=sender)
+sensor_reader.start()

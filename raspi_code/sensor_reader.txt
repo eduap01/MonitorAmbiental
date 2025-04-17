@@ -1,0 +1,70 @@
+import time
+import adafruit_dht
+import busio
+import digitalio
+import board
+import bmp180
+import RPi.GPIO as GPIO
+from datetime import datetime
+from joblib import load
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
+
+class SensorReader:
+    def __init__(self, dht_pin, mq_pin, sender):
+        self.dht_sensor = adafruit_dht.DHT22(dht_pin)
+        self.modelo = load('/home/eduardo/monitoring/modelo_temp_rpi.joblib')
+
+        try:
+            i2c = busio.I2C(scl=digitalio.DigitalInOut(board.SCL), sda=digitalio.DigitalInOut(board.SDA))
+            self.bmp_sensor = bmp180.BMP180(i2c)
+            self.bmp_sensor.sea_level_pressure = 1013.25
+        except Exception as e:
+            print(f"Error al inicializar BMP180: {e}")
+            self.bmp_sensor = None
+
+        self.mq_pin = mq_pin
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.mq_pin, GPIO.IN)
+
+        self.sender = sender
+
+    def read_and_send(self):
+        try:
+            temperatura = self.dht_sensor.temperature
+            humedad = self.dht_sensor.humidity
+
+            calidad_raw = GPIO.input(self.mq_pin)
+            calidad_aire = 100.0 if calidad_raw == 1 else 25.0
+
+            presion = 1013.25
+            if self.bmp_sensor:
+                try:
+                    presion = self.bmp_sensor.pressure
+                except Exception as e:
+                    print(f"Error al leer BMP180: {e}")
+
+            if temperatura is not None and humedad is not None:
+                print(f"\nTemp: {temperatura:.1f}°C | Hum: {humedad:.1f}% | Aire: {calidad_aire} | Presión: {presion:.2f} hPa")
+
+                entrada = [[temperatura, humedad, presion]]
+                prediccion = self.modelo.predict(entrada)[0]
+                print(f"Predicción de temperatura para +1h: {prediccion:.2f}°C")
+
+                self.sender.send_json({
+                    "fecha_hora": datetime.now().isoformat(),
+                    "temperatura": temperatura,
+                    "humedad": humedad,
+                    "calidad_aire": calidad_aire,
+                    "presion": presion,
+                    "prediccion_temp": prediccion
+                })
+
+        except Exception as e:
+            print(f"Error al leer sensores: {e}")
+
+    def start(self):
+        while True:
+            self.read_and_send()
+            time.sleep(60)
