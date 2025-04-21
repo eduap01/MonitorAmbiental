@@ -9,6 +9,8 @@ class MedicionBase(BaseModel):
     calidad_aire: float
     presion: float
     prediccion: Optional[float] = None
+    latitud: Optional[float] = None
+    longitud: Optional[float] = None
 
 # Clase usada para crear mediciones desde el frontend o Raspberry Pi
 class MedicionCreate(MedicionBase):

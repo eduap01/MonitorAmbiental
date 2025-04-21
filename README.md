@@ -66,8 +66,8 @@ http://localhost:8000
 
 ## Scripts disponibles
 
-- `scripts/exportar_datos.py` → exporta mediciones a CSV desde PostgreSQL.
-- `scripts/entrenar_modelo.py` → entrena modelo de predicción de temperatura.
+- `python scripts/exportar_datos.py` → exporta mediciones a CSV desde PostgreSQL.
+- ` python scripts/entrenar_modelo.py` → entrena modelo de predicción de temperatura.
 
 > El archivo `modelo_temp_rpi.joblib` se genera desde el script de entrenamiento y no está incluido en el repositorio por defecto.
 

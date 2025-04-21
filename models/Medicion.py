@@ -1,3 +1,4 @@
+from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, DateTime
 from database import Base
 
@@ -11,3 +12,4 @@ class Medicion(Base):
     calidad_aire = Column(Numeric(5, 2), nullable=False)
     presion = Column(Numeric(7, 2), nullable=False)
     prediccion = Column(Numeric(5, 2), nullable=True)
+    location = Column(Geometry("POINT", srid=4326), nullable=True)
