@@ -16,8 +16,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
-    db = SessionLocal()
+    db = SessionLocal() # Crea una nueva sesión
     try:
-        yield db
+        yield db # Devuelve la sesión para usarla con `Depends(get_db)`
     finally:
-        db.close()
+        db.close() # Cierra la sesión para liberar recursos

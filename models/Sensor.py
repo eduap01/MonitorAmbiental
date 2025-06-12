@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from database import Base
 
+#Parte descartada del proyecto. Ahora no tiene funcionalidad
 
 class Sensor(Base):
     __tablename__ = 'sensores'

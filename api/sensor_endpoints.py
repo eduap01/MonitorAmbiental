@@ -7,6 +7,8 @@ from models.Sensor import Sensor
 from pydantic_models.SensorPydantic import SensorCreate, SensorResponse  # Modelos Pydantic para validación y respuesta
 from database import SessionLocal
 
+#Parte descartada del proyecto. Ahora no tiene funcionalidad
+
 # Endpoint para insertar un sensor nuevo en la BD.
 # Usado para inicializar el sistema o añadir nuevos sensores posteriormente.
 

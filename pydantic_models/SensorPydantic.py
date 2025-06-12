@@ -2,6 +2,8 @@
 from pydantic import BaseModel
 from uuid import UUID
 
+#Parte descartada del proyecto. Ahora no tiene funcionalidad
+
 class SensorCreate(BaseModel):
     nombre: str
     tipo: str

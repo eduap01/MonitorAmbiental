@@ -401,13 +401,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   tipoSeleccionado = "temperatura";
 
-  // ✅ Cargar los datos desde la API al iniciar
+  //  Cargar los datos desde la API al iniciar
   try {
     const response = await fetch('/api/mediciones/');
     const datos = await response.json();
     datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
     datosTotales = datos;
-    refrescarVistaActual(); // ✅ Mostrar los datos iniciales
+    refrescarVistaActual(); //  Mostrar los datos iniciales
   } catch (error) {
     console.error("Error al cargar datos iniciales:", error);
   }

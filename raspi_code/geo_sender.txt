@@ -15,8 +15,9 @@ def obtener_ubicacion():
         print(f"Error obteniendo ubicación: {e}")
     return None
 
+# Envía la ubicación obtenida a un servidor mediante una solicitud POST
 def enviar_ubicacion():
-    ubicacion = obtener_ubicacion()
+    ubicacion = obtener_ubicacion() # Llama al método anterior para obtener la ubicación
     if ubicacion:
         try:
             # response = requests.post("http://192.168.150.221:8000/api/ubicacion/", json=ubicacion)  # clase
@@ -25,5 +26,6 @@ def enviar_ubicacion():
         except Exception as e:
             print("Error al enviar ubicación:", e)
 
+# Si se ejecuta el script directamente, obtiene y envía la ubicación
 if __name__ == "__main__":
     enviar_ubicacion()

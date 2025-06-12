@@ -9,49 +9,55 @@ from datetime import datetime
 from joblib import load
 import warnings
 
-warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning) # Ignora ciertos warnings molestos del sistema
 
 class SensorReader:
+    # Inicializa los sensores y el modelo de predicción
     def __init__(self, dht_pin, mq_pin, sender):
-        self.dht_sensor = adafruit_dht.DHT22(dht_pin)
-        self.modelo = load('/home/eduardo/monitoring/modelo_temp_rpi.joblib')
+        self.dht_sensor = adafruit_dht.DHT22(dht_pin)  # Sensor DHT22 (temperatura y humedad)
+        self.modelo = load('/home/eduardo/monitoring/modelo_temp_rpi.joblib')  # Carga el modelo de predicción
 
         try:
+            # Configura la comunicación I2C para el sensor BMP180 (presión)
             i2c = busio.I2C(scl=digitalio.DigitalInOut(board.SCL), sda=digitalio.DigitalInOut(board.SDA))
             self.bmp_sensor = bmp180.BMP180(i2c)
             self.bmp_sensor.sea_level_pressure = 1013.25
         except Exception as e:
             print(f"Error al inicializar BMP180: {e}")
-            self.bmp_sensor = None
+            self.bmp_sensor = None # Si falla, el sensor de presión se ignora
 
-        self.mq_pin = mq_pin
+        self.mq_pin = mq_pin # Pin del sensor MQ-135 (calidad del aire)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.mq_pin, GPIO.IN)
 
-        self.sender = sender
+        self.sender = sender # Objeto encargado de enviar los datos (por red)
 
+    # Lee los sensores, genera la predicción y envía los datos
     def read_and_send(self):
         try:
-            temperatura = self.dht_sensor.temperature
-            humedad = self.dht_sensor.humidity
+            temperatura = self.dht_sensor.temperature  # Lee la temperatura del DHT22
+            humedad = self.dht_sensor.humidity         # Lee la humedad del DHT22
 
-            calidad_raw = GPIO.input(self.mq_pin)
-            calidad_aire = 100.0 if calidad_raw == 1 else 25.0
+            calidad_raw = GPIO.input(self.mq_pin)      # Lee el valor binario del MQ-135
+            calidad_aire = 100.0 if calidad_raw == 1 else 25.0  # Traduce el valor a un número representativo
 
-            presion = 1013.25
+            presion = 1013.25 # Valor por defecto
             if self.bmp_sensor:
                 try:
-                    presion = self.bmp_sensor.pressure
+                    presion = self.bmp_sensor.pressure # Si está disponible, lee la presión del BMP180
                 except Exception as e:
                     print(f"Error al leer BMP180: {e}")
 
+            # Si la lectura fue exitosa
             if temperatura is not None and humedad is not None:
                 print(f"\nTemp: {temperatura:.1f}°C | Hum: {humedad:.1f}% | Aire: {calidad_aire} | Presión: {presion:.2f} hPa")
 
+                # Genera una predicción con el modelo entrenado
                 entrada = [[temperatura, humedad, presion]]
                 prediccion = self.modelo.predict(entrada)[0]
                 print(f"Predicción de temperatura para +1h: {prediccion:.2f}°C")
 
+                # Envía los datos junto con la predicción al servidor
                 self.sender.send_json({
                     "fecha_hora": datetime.now().isoformat(),
                     "temperatura": temperatura,
@@ -64,6 +70,7 @@ class SensorReader:
         except Exception as e:
             print(f"Error al leer sensores: {e}")
 
+    # Inicia el ciclo infinito de lectura
     def start(self):
         while True:
             self.read_and_send()
