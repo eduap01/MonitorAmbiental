@@ -1,6 +1,6 @@
-# Monitor Ambiental
+# Estación Meteorológica Inteligente
 
-Este es un proyecto de monitoreo ambiental con sensores conectados a una Raspberry Pi, visualización web en tiempo real y predicción básica de temperatura usando inteligencia artificial ligera.
+Este es un proyecto de estación meteorológica inteligente con sensores conectados a una Raspberry Pi, visualización web en tiempo real y predicción básica de temperatura usando inteligencia artificial ligera.
 
 ---
 
@@ -17,7 +17,7 @@ Este es un proyecto de monitoreo ambiental con sensores conectados a una Raspber
 ## Estructura del proyecto
 
 ```
-monitor-ambiental/
+Estacion-Meteorologica-Inteligente/
 ├── api/                  # Endpoints FastAPI
 ├── metodos/             # CRUDs
 ├── models/              # Modelos SQLAlchemy
@@ -35,8 +35,8 @@ monitor-ambiental/
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu_usuario/monitor-ambiental.git
-cd monitor-ambiental
+git clone https://github.com/eduap01/Estacion-Meteorologica-Inteligente.git
+cd Estacion-Meteorologica-Inteligente
 ```
 
 2. Crea un entorno virtual:
